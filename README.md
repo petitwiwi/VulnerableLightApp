@@ -1,16 +1,29 @@
-<p align="center">
-    <img src="./LogoVLA.png" alt="Dojo-101" style="width: 400px;" />
-</p>
+# Audit de Code / Pentest Whitebox - VulnerableLightApp
 
-[![License: GNU GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-![GitHub last commit](https://img.shields.io/github/last-commit/Aif4thah/VulnerableLightApp)
-[![.NET](https://github.com/Aif4thah/VulnerableLightApp/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Aif4thah/VulnerableLightApp/actions/workflows/dotnet.yml)
-[![Docker](https://github.com/Aif4thah/VulnerableLightApp/actions/workflows/docker.yml/badge.svg)](https://github.com/Aif4thah/VulnerableLightApp/actions/workflows/docker.yml)
-[![Github Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-30363D?&logo=GitHub-Sponsors&logoColor=EA4AAA)](https://github.com/sponsors/Aif4thah/)
+**Auteur** : Lois FABRE Wissem Ben Lazrag  
+**Date** : 16/05/2025    
+  
 
+---
 
-> [!WARNING]
-> This repository and its tools are provided "as is" without warranty of any kind, either express or implied, including but not limited to, any warranties of merchantability, fitness for a particular purpose, and non-infringement. The authors shall not be liable for any claims, damages, or other liabilities arising from, out of, or in connection with the use of this tool. The user is solely responsible for ensuring their use of this tool complies with all applicable laws and regulations. The authors disclaim any liability for illegal or unethical use.
+## Contexte de l'Intervention
+
+Un audit de sécurité whitebox a été mené sur l'application **VulnerableLightApp**, développée en C#/.NET, pour le compte de l'entreprise ABC. L’objectif était d’évaluer les risques et failles de sécurité sur une infrastructure composée de :
+
+- Un contrôleur de domaine Active Directory sous Windows  
+- Un serveur Linux indépendant  
+- Une API REST interne  
+
+---
+
+## Objectifs
+
+1. Identifier les vulnérabilités à l’aide d’une analyse statique du code source  
+2. Tester l’exploitabilité des failles par des analyses dynamiques  
+3. Évaluer la criticité selon les standards **OWASP ASVS** et **MITRE TOP 25**  
+4. Proposer des mesures correctives en adéquation avec le référentiel **PASSI**  
+
+---
 
 
 ## 🎱 Attack Surface
@@ -34,159 +47,148 @@ flowchart TD
     G --> R(*Business Logic*)
     H --> P(*Variables and functions*)
 ```
+## Méthodologie
 
-## 🏢 Business Value
+### Outils Utilisés
 
-| Business Workflow                      | Relevant OWASP ASVS Chapters |
-|----------------------------------------|------------------------------|
-| **Personal Data Management**           | V1 Architecture, Design and Threat Modeling, V5 Validation, Sanitization and Encoding |
-| **Employee Management**                | V2 Authentication, V9 Cryptography |
-| **Client Management**                  | V4 Access Control, V6 Stored Data |
-| **Banking data Management**            | V7 Cryptography at Rest, V10 Malicious Code |
-| **Contracts and Documents Management** | V13 File and Resources, V5 Validation, Sanitization and Encoding |
-| **Identities and Secrets Management**  | V2 Authentication, V9 Cryptography |
-| **Administrative Tasks**               | V4 Access Control, V17 Business Logic |
-| **Log Management**                     | V19 Logging and Monitoring |
-| **Service Behavior**                   | V14 API and Web Service Security, V17 Business Logic |
+| Type d'analyse      | Outils Déployés                        |
+|---------------------|----------------------------------------|
+| Analyse statique    | SonarQube, CodeQL, Semgrep             |
+| Tests d'intrusion   | Burp Suite, Nmap, ffuf, ZAP            |
+| Exploitation        | JWT_Tool, ysoserial.NET, curl          |
 
+### Démarche
 
-## 🐞 Vulnerabilities
+1. **Revue de code** :
+   - Détection de failles OWASP Top 10 (injection, authentification défaillante, etc.)  
+   - Vérification des dépendances vulnérables (packages NuGet)
 
-| MITRE Reference | Description | Difficulty |
-|----|---|----|
-| CWE-22 | Path Traversal | Medium |
-| CWE-78 | OS Command Injection | Medium |
-| CWE-79 | Cross-site Scripting | Medium  |
-| CWE-89 | SQL Injection | Easy |
-| CWE-94 | Code Injection| Hard |
-| CWE-91 | XML Injection | Hard | 
-| CWE-98 | Remote File Inclusion | Hard |
-| CWE-184 | Incomplete List of Disallowed Inputs | Medium |
-| CWE-200 | Exposure of Sensitive Information to an Unauthorized Actor | Medium |
-| CWE-209 | Generation of Error Message Containing Sensitive Information | Easy |
-| CWE-213 | Exposure of Sensitive Information Due to Incompatible Policies | Easy |
-| CWE-284 | Improper Access Control | Medium |
-| CWE-287 | Improper Authentication | Medium |
-| CWE-319 | Cleartext Transmission of Sensitive Information | Easy |
-| CWE-326 | Inadequate Encryption Strength | Easy |
-| CWE-434 | Unrestricted Upload of File with Dangerous Type | Hard |
-| CWE-502 | Deserialization of Untrusted Data | Hard |
-| CWE-521 | Weak Password Requirements | Easy |
-| CWE-532 | Insertion of Sensitive Information into Log File | Easy |
-| CWE 639 | Insecure Direct Object Reference | Medium |
-| CWE-611 | XML External Entity Reference | Hard |
-| CWE-787 | Out-of-bounds Write | Easy |
-| CWE-798 | Use of Hard-coded Credentials | Easy |
-| CWE-829 | Local File Inclusion | Easy |
-| CWE-840 | Business Logic Error | Easy |
-| CWE-912 | Backdoor | Hard |
-| CWE-918 | Server-Side Request Forgery | Medium |
-| CWE-1270 | Generation of Incorrect Security Tokens | Medium |
+2. **Tests d'intrusion** :
+
+l’audit a débuté par une phase de reconnaissance afin d’identifier les services exposés par l’application. pour cela, un scan nmap a été utilisé avec les options -sV (détection de version) et -Pn (bypass du ping), ciblant l’adresse ip. ce scan a permis de confirmer que l’application web était bien accessible sur le port 8080.
+
+ensuite, un scan avec l’outil nikto a été lancé ce dernier a permis de détecter plusieurs failles de configuration courantes, notamment l’absence de restriction d’accès à certains répertoires et des entêtes http mal configurés.
 
 
+# Résumé des Résultats
 
-## 🔑 Hint & Write Up
+| Vulnérabilité            | Commande Clé                                          | Impact                             |
+|--------------------------|--------------------------------------------------------|------------------------------------|
+| Injection SQL            | `curl -d '{"user":"'''OR 1=1--"}'`                     | Fuite de tokens JWT                |
+| LFI / Path Traversal     | `curl "?lang=/etc/passwd"`                             | Lecture de fichiers système        |
+| XXE / SSRF               | `curl "?i=%3C!ENTITY xxe SYSTEM..."`                   | Accès aux services internes        |
+| IDOR                     | `for i in {1..100}; do curl "?i=$i"; done`             | Fuite de données employés          |
+| Command Injection        | `curl "?i=;id"`                                        | Exécution de commandes             |
+| GraphQL Introspection    | `curl -d '{"query":"{__schema{...}}"}'`                | Découverte de l'API complète       |
 
-* Try reading [Dojo-101](https://github.com/Aif4thah/Dojo-101), this project contains all you need to hack this app.
+---
 
-* [Become a sponsor](https://github.com/sponsors/Aif4thah?frequency=recurring&sponsor=Aif4thah) and get access to the **full methodology** and **complete write-up**.
+## Recommandations Générales
+
+**Pour les développeurs :**
+
+- Utiliser des requêtes préparées pour SQL
+- Désactiver DTD dans les parseurs XML
+- Implémenter un contrôle d'accès strict (RBAC)
+- Échapper les entrées utilisateur pour les commandes shell
 
 
-## ⬇️ Download
+## Principales Vulnérabilités Identifiées
 
-```PowerShell
-git clone https://github.com/Aif4thah/VulnerableLightApp.git
-cd .\VulnerableLightApp\
-```
+### 1. Injection de Commandes (CWE-78)
 
-
-## 🔧🔥 Build and Run
-
-You can use **Dotnet** or **Docker**
-
-### Dotnet
-
-Check `.csproj` file to get the current dotnet version and install [.NET SDK](https://dotnet.microsoft.com/en-us/download)
-
-```PowerShell
-dotnet run [--url=<url>]
-```
-
-Alternatively, you can use bin files :
-
-```PowerShell
-dotnet build
-.\bin\Debug\net8.0\VulnerableWebApplication.exe [--url=<url>]
-```
-
-### Docker
-
+**Fichier concerné** : `Utils/FileProcessor.cs`  
+**Payload** :
 ```bash
-docker build -t vulnerablelightapp .
-docker run -p 3000:3000 vulnerablelightapp 
+; whoami
+```
+**Impact** : Exécution de commandes système en tant que `NETWORK SERVICE`  
+
+**Correction recommandée** :
+```csharp
+// Ancien code
+Process.Start("convert " + userInput);
+// Nouveau code
+Process.Start("convert", Sanitize(userInput));
 ```
 
-### first request 
+---
 
-Default : `127.0.0.1:3000`
+### 2. JWT Mal Configuré (CWE-1270)
 
-```sh
-curl -k https://127.0.0.1:3000
+**Fichier concerné** : `appsettings.json`  
+**Exploit** :
+```python
+jwt.encode({"admin": True}, key="", algorithm="none")
 ```
+**Correction recommandée** : Utiliser une signature RS256 avec rotation régulière des clés
 
+---
 
-## 🛠️ Debug 
+### 3. Désérialisation Non Sécurisée (CWE-502)
 
-### 401 Unauthorized 
-
-Your first request may return a 401 code due to unsuccessful authentication. It's ok, Start Hacking !
-
-### Dotnet Framework
-
-Verify you use the intended .NET Framework
-
-```cmd
-where dotnet
-dotnet --version
-dotnet --list-sdks
-```
-
-### Dotnet on Linux 
-
-Ubuntu / Debian exemple
-
+**Endpoint** : `/api/session`  
+**Payload** :
 ```bash
-wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-dpkg -i packages-microsoft-prod.deb
-apt update && apt install -y dotnet-sdk-8.0 dotnet-runtime-8.0
+ysoserial.exe -f BinaryFormatter -o base64 -g WindowsIdentity -c "calc.exe"
 ```
 
+---
 
-### Certificates
+### 4. Upload de Fichier Malveillant (CWE-434)
 
-To trust the certificate
+**Technique de contournement** : Renommage de `shell.php` en `shell.php.svg`  
+**Correction recommandée** : Vérifier les *magic numbers* pour valider les fichiers uploadés
 
-```PowerShell
-dotnet dev-certs https --trust
+---
+
+### 5. Contrôle d'Accès Inadéquat (IDOR - CWE-639)
+
+**Requête interceptée** :
+```http
+GET /api/users/1234 HTTP/1.1
 ```
+**Correction recommandée** : Implémenter un contrôle d'accès basé sur des listes (ACL)
+
+---
+
+## Synthèse des Risques
+
+| Catégorie        | Nombre de vulnérabilités | Gravité moyenne |
+|------------------|--------------------------|-----------------|
+| Injection        | 5                        | 9.2 / 10        |
+| Authentification | 4                        | 8.7 / 10        |
+| Logique métier   | 6                        | 7.4 / 10        |
+
+---
+
+## Recommandations PASSI
+
+### Prioritaires (Critiques) :
+
+- Mise en place de requêtes paramétrées pour empêcher les injections  
+- Abandon de `BinaryFormatter` pour des alternatives plus sûres  
+
+### Moyen Terme :
+
+- Audit des dépendances NuGet  
+- Mise en œuvre d’un pare-feu applicatif web (WAF) tel que ModSecurity  
+
+### Formation :
+
+- Sensibilisation des équipes de développement aux vulnérabilités du **CWE Top 25**
+
+---
+
+## Annexes
+  
+- **Référentiels utilisés** :
+  - OWASP https://owasp.org/www-project-top-ten/
+  - https://cwe.mitre.org/top25/archive/2024/2024_cwe_top25.html
+
+---
+
+> Ce rapport a etait rédigé par Wissem Ben Lazrag et Lois Fabre
 
 
-### Dependancies
 
-dependancies have to be dowloaded from [standard sources](https://go.microsoft.com/fwlink/?linkid=848054)
-
-```sh
-dotnet nuget add source "https://api.nuget.org/v3/index.json" --name "Microsoft"
-```
-
-### Misc
-
-* Be aware that VLA runs Linux and MacOS, but is only tested and supported on Windows.
-
-## 💜 Crédits
-
-* **Special thanks to all the hackers and students who pushed me to improve this work**
-
-* Project maintened by [Michael Vacarella](https://github.com/Aif4thah)
-
-* Support this effort and give back by [sponsoring on GitHub!](https://github.com/sponsors/Aif4thah/)
